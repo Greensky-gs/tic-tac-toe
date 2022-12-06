@@ -1,3 +1,6 @@
+from random import randint
+from os import system
+
 class Morpion:
     plate = []
     turn = "user"
@@ -9,7 +12,7 @@ class Morpion:
 
     def __init__(self, options = {}):
         self.machineCross = options.get("machineCross", "O")
-        self.neutralCross = options.get('neutralCross', "E")
+        self.neutralCross = options.get('neutralCross', " ")
         self.userCross = options.get('userCross', 'X')
 
         for i in range(3):
@@ -68,11 +71,12 @@ class Morpion:
             if isValid:
                 winner = ('machine', 'user')[state == self.userCross];
                 self.winner = winner
+                self.ended = True
 
         return winner;
 
     def chooseCase(self):
-        choosen = "";
+        choosen = None;
         plate = self.platify();
         lignes = [];
         numbers = "012 120 345 453 678 786 036 147 258 360 471 582 048 246 642 840 175 354 084 021 354 087 063 285 048 687 084";
@@ -83,41 +87,57 @@ class Morpion:
             lignes.append(array);
 
         for x in lignes:
-            if plate[x[2]] != self.neutralCross:
-                index = lignes.index(x)
-                lignes.splice(index, 1);
+            if plate[int(x[2])] != self.neutralCross:
+                lignes.remove(x)
 
         for cases in lignes:
-            state = plate[cases[0]];
-            if plate[cases[2]] != self.neutralCross:
-                return;
-            if plate[cases[1]] == state && state === this.bot_piece) choosen = cases[2];
-        });
-        if (!choosen) {
-            lignes.forEach((cases) => {
-                let state = this.matrix[cases[0]];
-                if (this.matrix[cases[2]] !== this.neutral) return;
-                if (this.matrix[cases[1]] === state && state === this.user_piece) choosen = cases[2];
-            });
-        };
-        if (!choosen) {
-            const props = [0,2,4,6,8].filter(x => this.matrix[x] === this.neutral);
-            if (props.length > 0) {
-                choosen = props[functions.random(props.length, 0)];
-            } else {
-                const subs = [1,3,5,7].filter(x => this.matrix[x] === this.neutral);
-                if (subs.length > 0) {
-                    choosen = subs[functions.random(subs.length, 0)];
-                };
-            };
-        };
-        if (!choosen) {
-            const poss = [0, 1, 2, 3, 4, 5, 6, 7, 8].filter((x) => this.matrix[x] === this.neutral);
-            if (poss.length === 0) return;
-            choosen = poss[functions.random(poss.length, 0)];
-        }
+            state = plate[int(cases[0])];
+            if plate[int(cases[2])] == self.neutralCross and plate[int(cases[1])] == state and state == self.machineCross:
+                choosen = cases[2];
+
+        if not choosen:
+            for cases in lignes:
+                state = plate[int(cases[0])];
+                if plate[int(cases[1])] == state and state == self.userCross:
+                    choosen = cases[2];
+        if not choosen:
+            props = list(filter(lambda x: plate[x] == self.neutralCross, [ 0, 2, 4, 6, 8 ]))
+
+            if len(props) > 0:
+                choosen = props[randint(0, len(props) - 1)];
+            else:
+                subs = list(filter(lambda x: plate[x] == self.neutralCross, [1,3,5,7]))
+
+                if len(subs) > 0:
+                    choosen = subs[randint(0, len(subs) - 1)];
+        if not choosen:
+            poss = (lambda x: plate[x] == self.neutralCross, [0, 1, 2, 3, 4, 5, 6, 7, 8])
+
+            if not len(poss) == 0:
+                choosen = poss[randint(0, len(poss) - 1)];
+        if choosen is not None:
+            if isinstance(choosen, list):
+                choosen = choosen[0]
+            if isinstance(choosen, str):
+                choosen = int(choosen)
+
+            if choosen < 3:
+                return {
+                    'x': 0,
+                    'y': choosen
+                }
+            elif choosen < 6:
+                return { 'x': 1, 'y': choosen - 3 }
+            else:
+                return { 'x': 2, 'y': choosen - 6}
         return choosen;
 
+    def botPlay(self):
+        case = self.chooseCase();
+        if not case is None:
+            self.setCord(case.get('x'), case.get('y'), 'm')
+        self.check()
+    
     def play(self, x, y):
         if self.ended:
             return "Already ended"
@@ -131,7 +151,9 @@ class Morpion:
             return 'Case not empty'
 
         self.setCord(x, y, 'u')
+        self.check();
         return "Played"
+
     def setCord(self, x, y, type):
         if not self.validCords(x, y):
             return 'Invalid coordinates'
@@ -142,14 +164,35 @@ class Morpion:
         for x in range(3):
             for y in range(3):
                 if not y == 0:
-                    plate = plate + ' '
+                    plate = plate + '|'
                 plate = plate + self.cords(x, y)
             if not x == 2:
                 plate = plate + '\n-|-|-\n'
             else:
                 plate = plate + '\n'
-        plate = plate.replace(' ', '|')
         return plate
         
-morpion = Morpion()
-print(morpion.stringifyPlate())
+# morpion = Morpion()
+
+# print(morpion.stringifyPlate());
+# while morpion.ended == False:
+#     x = int(input("X: "))
+#     y = int(input('Y: '))
+    
+#     morpion.play(x, y);
+#     if morpion.winner == 'user':
+#         print("You won")
+#     elif morpion.winner == 'bot':
+#         print("I won")
+#     else:
+#         morpion.botPlay();
+#         if morpion.winner == 'user':
+#             print("You won")
+#         elif morpion.winner == 'bot':
+#             print("I won")
+#     system('cls')
+#     print(morpion.stringifyPlate())
+    
+
+# if not morpion.winner:
+#     print("No one's won")
