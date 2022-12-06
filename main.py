@@ -78,38 +78,36 @@ class Morpion:
     def chooseCase(self):
         choosen = None;
         plate = self.platify();
-        lignes = [];
+
         numbers = "012 120 345 453 678 786 036 147 258 360 471 582 048 246 642 840 175 354 084 021 354 087 063 285 048 687 084";
+        # Define play order. First tuple will be checked, because it gives the bot a win,
+        # Then check the second tuple, the defensive one
+        # If this do not provide a play, the bot will choose an available case inside of the 3 tuple
+        # In case of no case in the third tuple, use a case from fourth tuple
+        # And in the extrem case of no cases provided, take a random one
+        # In the inner tuples, if the two are occupied by the bot, play the third if it is available
+        # The fourth is the filling method, default is 0
+        # if it's 0 it means that if 1 and 2 are bot, play third
+        # If it's 1, it means that if 1 is bot and 2 is player, play third
+        # If it's 2, it means that if both are player, play third
+        # If it's 3, it means that if 1 is bot and don't care about 2, play third
+        # If it's 4, it means that if 2 is player and don't care about 2, play third
+        priorities = (
+            ( "012", "021", "120", "048", "084", "840", '480', "345", "435", "453", "543", "354", "534", "246", "264", "462", "642", "624", "678", "768", "687", "867", "786", "876" ),
+            ( "0212", "0632", "0842", "2642", "2852", "8672", "0482", "2462", "8402", "6422", "0122", "0212", "2102", "3452", "5432", "3542", "5342", "6782", "6872", "8762", "8672", "0362", "0632", "3602", "1472", "1742", "7412", "2582", "2852", "8522" ),
+            ( "4003", "4023", "4083", "4063", "0443", "2443", "6443", "8443" ),
+            ( "4013", "4033", "4373", "4453" )
+        )
 
-        arrays = numbers.split(' ');
-        for x in arrays:
-            array = [x[0], x[1], x[2]];
-            lignes.append(array);
+        for priority in priorities:
+            for item in priority:
+                fillMode = "2"
+                if len(item) == 4:
+                    fillMode = item[3]
+                
+                
 
-        for x in lignes:
-            if plate[int(x[2])] != self.neutralCross:
-                lignes.remove(x)
-
-        for cases in lignes:
-            state = plate[int(cases[0])];
-            if plate[int(cases[2])] == self.neutralCross and plate[int(cases[1])] == state and state == self.machineCross:
-                choosen = cases[2];
-
-        if not choosen:
-            for cases in lignes:
-                state = plate[int(cases[0])];
-                if plate[int(cases[1])] == state and state == self.userCross:
-                    choosen = cases[2];
-        if not choosen:
-            props = list(filter(lambda x: plate[x] == self.neutralCross, [ 0, 2, 4, 6, 8 ]))
-
-            if len(props) > 0:
-                choosen = props[randint(0, len(props) - 1)];
-            else:
-                subs = list(filter(lambda x: plate[x] == self.neutralCross, [1,3,5,7]))
-
-                if len(subs) > 0:
-                    choosen = subs[randint(0, len(subs) - 1)];
+        
         if not choosen:
             poss = (lambda x: plate[x] == self.neutralCross, [0, 1, 2, 3, 4, 5, 6, 7, 8])
 
@@ -172,27 +170,27 @@ class Morpion:
                 plate = plate + '\n'
         return plate
         
-# morpion = Morpion()
+morpion = Morpion()
 
-# print(morpion.stringifyPlate());
-# while morpion.ended == False:
-#     x = int(input("X: "))
-#     y = int(input('Y: '))
+print(morpion.stringifyPlate());
+while morpion.ended == False:
+    x = int(input("X: ")) - 1
+    y = int(input('Y: ')) - 1
     
-#     morpion.play(x, y);
-#     if morpion.winner == 'user':
-#         print("You won")
-#     elif morpion.winner == 'bot':
-#         print("I won")
-#     else:
-#         morpion.botPlay();
-#         if morpion.winner == 'user':
-#             print("You won")
-#         elif morpion.winner == 'bot':
-#             print("I won")
-#     system('cls')
-#     print(morpion.stringifyPlate())
+    morpion.play(x, y);
+    if morpion.winner == 'user':
+        print("You won")
+    elif morpion.winner == 'bot':
+        print("I won")
+    else:
+        morpion.botPlay();
+        if morpion.winner == 'user':
+            print("You won")
+        elif morpion.winner == 'bot':
+            print("I won")
+    system('cls')
+    print(morpion.stringifyPlate())
     
 
-# if not morpion.winner:
-#     print("No one's won")
+if not morpion.winner:
+    print("No one's won")
