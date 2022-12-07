@@ -20,8 +20,10 @@ class Morpion:
             for _ in range(3):
                 self.plate[i].append(self.neutralCross)
     
-    def validCords(self, x, y):
+    def validCords(self, x, y, checkNeutral = False):
         if not x in range(3) or not y in range(3):
+            return False
+        if checkNeutral == True and not self.plate[x][y] == self.neutralCross:
             return False
         return True
 
@@ -99,14 +101,32 @@ class Morpion:
             ( "4013", "4033", "4373", "4453" )
         )
 
+        # Define fill methods checkers
+        def zero(item):
+            return plate[int(item[0])] == self.machineCross == plate[int(item[1])]
+        
+        def one(item):
+            return plate[int(item[0])] == self.machineCross and plate[int(item[1])] == self.userCross
+        def two(item):
+            return plate[int(item[0])] == self.userCross == plate[int(item[1])]
+
+        def three(item):
+            return plate[int(item[0])] == self.machineCross
+
+        def four(item):
+            return plate[int(item[0])] == self.userCross
+
+        fillCheckers = ( zero, one, two, three, four )
+
         for priority in priorities:
             for item in priority:
                 fillMode = "2"
                 if len(item) == 4:
                     fillMode = item[3]
                 
-                
-
+                valid = fillCheckers[int(fillMode)](item)
+                if valid:
+                    choosen = item[2]
         
         if not choosen:
             poss = (lambda x: plate[x] == self.neutralCross, [0, 1, 2, 3, 4, 5, 6, 7, 8])
@@ -153,13 +173,14 @@ class Morpion:
         return "Played"
 
     def setCord(self, x, y, type):
-        if not self.validCords(x, y):
+        if not self.validCords(x, y, True):
             return 'Invalid coordinates'
         self.plate[x][y] = self.pawnType(type)
 
     def stringifyPlate(self):
         plate = ""
         for x in range(3):
+            print(f"Line {x}")
             for y in range(3):
                 if not y == 0:
                     plate = plate + '|'
